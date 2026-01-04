@@ -1,0 +1,44 @@
+[
+  {
+    "url": "https://youtu.be/9tigHWH-UD8?si=nfbIIVHLU9Vz6Dh-",
+    "output": "./downloads",
+    "format": "Audio only",
+    "timestamp": "2026-01-03T10:02:45.386180Z"
+  },
+  {
+    "url": "https://youtu.be/v7B1_y2LAeI?si=rb-4U6R_BogJfvho",
+    "output": "./downloads",
+    "format": "Audio only",
+    "notes": "",
+    "tags": [],
+    "quality": "best",
+    "timestamp": "2026-01-03T12:57:52.762853Z"
+  },
+  {
+    "url": "https://youtu.be/BtlYrbICuhs?si=LGi8GNjkuIVzWCSN",
+    "output": "./downloads",
+    "format": "Video + Audio (muxed)",
+    "notes": "",
+    "tags": [],
+    "quality": "bestvideo[height<=480]+bestaudio/best",
+    "timestamp": "2026-01-03T14:12:14.006432Z"
+  },
+  {
+    "url": "https://youtu.be/E-8nIUAak_c?si=UDcMdQmH74Jpkq6Q",
+    "output": "./downloads",
+    "format": "Audio only",
+    "notes": "",
+    "tags": [],
+    "quality": "best",
+    "timestamp": "2026-01-04T08:52:32.337749Z"
+  },
+  {
+    "url": "https://youtu.be/E-8nIUAak_c?si=UDcMdQmH74Jpkq6Q",
+    "output": "./downloads",
+    "format": "Audio only",
+    "notes": "",
+    "tags": [],
+    "quality": "best",
+    "timestamp": "2026-01-04T09:25:09.611902Z"
+  }
+]

@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Artemis Video Suite</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  </head>
+  <body>
+    <div class="page">
+      <header class="cf-topbar">
+        <div>
+          <p class="logo">Artemis Video Suite</p>
+          <h1>Local-first orchestration</h1>
+          <p class="muted">
+            Paste playlists, snippets, or channels. Artemis queues and monitors everything locally with
+            a clear control panel inspired by competitive dashboards.
+          </p>
+        </div>
+        <div class="cf-top-actions">
+          <button class="ghost">Docs</button>
+          <button class="primary">Launch workspace</button>
+        </div>
+      </header>
+
+      <section class="cf-stats" aria-label="Live stats">
+        <article class="cf-card">
+          <span class="cf-label">Queued</span>
+          <strong id="statQueued">0</strong>
+          <p class="cf-caption">waiting for workers</p>
+        </article>
+        <article class="cf-card">
+          <span class="cf-label">Running</span>
+          <strong id="statRunning">0</strong>
+          <p class="cf-caption">active downloads</p>
+        </article>
+        <article class="cf-card">
+          <span class="cf-label">Completed</span>
+          <strong id="statCompleted">0</strong>
+          <p class="cf-caption">since server start</p>
+        </article>
+        <article class="cf-card">
+          <span class="cf-label">Avg. progress</span>
+          <strong id="statAvgProgress">0%</strong>
+          <p class="cf-caption">across active tasks</p>
+        </article>
+        <article class="cf-card">
+          <span class="cf-label">Failed</span>
+          <strong id="statFailed">0</strong>
+          <p class="cf-caption">needs attention</p>
+        </article>
+      </section>
+
+      <section class="cf-summary" aria-label="Overall summary">
+        <div>
+          <span class="cf-label">Workers</span>
+          <strong id="summaryWorkers">0</strong>
+        </div>
+        <div>
+          <span class="cf-label">Avg. ETA</span>
+          <strong id="summaryAvg">—</strong>
+        </div>
+        <div>
+          <span class="cf-label">Completed</span>
+          <strong id="summaryCompleted">0</strong>
+        </div>
+        <div>
+          <span class="cf-label">Failed</span>
+          <strong id="summaryFailed">0</strong>
+        </div>
+      </section>
+
+      <div class="cf-grid">
+        <form class="cf-panel config-panel" id="configForm">
+          <header class="panel-heading">
+            <div>
+              <h2>Queue configuration</h2>
+              <p class="muted">Nail the URLs, presets, and limits before hitting start.</p>
+            </div>
+            <span class="badge" id="queueCount">0 queued</span>
+          </header>
+
+          <label class="field">
+            <span>URLs (one per line)</span>
+            <textarea id="urlList" rows="3" placeholder="https://..."></textarea>
+          </label>
+
+          <div class="field-row">
+            <label class="field half">
+              <span>Output folder</span>
+              <input id="outputDir" type="text" value="./downloads" />
+            </label>
+            <label class="field half">
+              <span>Filename template</span>
+              <input id="filenameTpl" type="text" value="%(title)s.%(ext)s" />
+            </label>
+          </div>
+
+          <div class="field-row">
+            <label class="field half">
+              <span>Format preset</span>
+              <select id="formatPreset">
+                {% for option in ["Smart (best combined)", "Video + Audio (muxed)", "Audio only", "Subtitle + metadata", "Playlist (flat)"] %}
+                <option>{{ option }}</option>
+                {% endfor %}
+              </select>
+            </label>
+            <label class="field half">
+              <span>Audio codec</span>
+              <select id="audioCodec">
+                {% for codec in ["mp3", "m4a", "wav", "opus"] %}
+                <option>{{ codec }}</option>
+                {% endfor %}
+              </select>
+            </label>
+          </div>
+
+          <label class="field">
+            <span>Quality target</span>
+            <select id="qualitySelect">
+              {% for quality in quality_options %}
+              <option value="{{ quality.value }}" title="{{ quality.hint }}">{{ quality.label }}</option>
+              {% endfor %}
+            </select>
+          </label>
+
+          <div class="field-row">
+            <label class="field half">
+              <span>Subtitle languages</span>
+              <input id="subtitleLang" type="text" placeholder="en, es" />
+            </label>
+            <label class="field half">
+              <span>Proxy (optional)</span>
+              <input id="proxy" type="text" placeholder="http://127.0.0.1:8080" />
+            </label>
+          </div>
+
+          <div class="field-row inline-fields">
+            <label class="field inline">
+              <input id="embedSubs" type="checkbox" />
+              <span>Embed subtitles</span>
+            </label>
+            <label class="field inline">
+              <input id="embedMeta" type="checkbox" />
+              <span>Embed metadata</span>
+            </label>
+          </div>
+
+          <div class="field-row inline-fields">
+            <label class="field inline">
+              <input id="keepThumb" type="checkbox" />
+              <span>Keep thumbnail</span>
+            </label>
+            <label class="field inline">
+              <input id="simulate" type="checkbox" />
+              <span>Dry run</span>
+            </label>
+          </div>
+
+          <label class="field">
+            <span>Playlist limit (0 = all)</span>
+            <input id="playlistLimit" type="number" min="0" value="0" />
+          </label>
+
+          <div class="actions">
+            <button type="button" id="addBtn">Add to queue</button>
+            <button type="button" id="startBtn" class="primary">Start downloads</button>
+          </div>
+        </form>
+
+        <div id="queue-section" class="cf-panel queue-panel">
+          <header class="panel-heading">
+            <div>
+              <h2>Queue &amp; telemetry</h2>
+              <p class="muted">Workers: <span id="activeWorkers">0</span></p>
+            </div>
+            <div class="concurrency">
+              <label for="concurrency">Workers</label>
+              <input id="concurrency" type="range" min="1" max="8" value="2" />
+              <span id="concurrencyValue">2</span>
+            </div>
+          </header>
+          <div class="queue-table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>URL</th>
+                  <th>Mode</th>
+                  <th>Status</th>
+                  <th>Progress</th>
+                  <th>Tags</th>
+                  <th>Download</th>
+                </tr>
+              </thead>
+              <tbody id="queueBody"><tr><td colspan="6" class="empty">No tasks yet</td></tr></tbody>
+            </table>
+          </div>
+          <footer class="queue-footer">
+            <button id="clearBtn">Clear finished</button>
+            <p class="muted">Status and ETA refresh every few seconds.</p>
+          </footer>
+        </div>
+      </div>
+
+      <div class="cf-grid cf-history-log">
+        <div id="history-section" class="cf-panel history-panel">
+          <header class="panel-heading small">
+            <h2>History</h2>
+          </header>
+          <ul id="historyList" class="history-list"></ul>
+        </div>
+        <div id="log-section" class="cf-panel log-panel">
+          <header class="panel-heading small">
+            <h2>Console log</h2>
+          </header>
+          <pre id="logOutput" class="log-output"></pre>
+        </div>
+      </div>
+    </div>
+    <div id="toast" class="toast"></div>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+  </body>
+</html>

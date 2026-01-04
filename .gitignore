@@ -1,0 +1,28 @@
+# Byte-compiled / package folders
+__pycache__/
+*.py[cod]
+*.so
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# IDE/editor configs
+.vscode/
+.idea/
+*.iml
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# yt_downloader artifacts
+yt_downloader/downloads/
+yt_downloader/downloads-history.json
